@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tmx version="1.4">
+  <header creationtool="TestFixture" creationtoolversion="1.0"
+          segtype="sentence" o-tmf="TestFixture"
+          adminlang="en" srclang="en" datatype="plaintext"/>
+  <body>
+    <tu>
+      <tuv xml:lang="en"><seg>Hello world</seg></tuv>
+      <tuv xml:lang="th"><seg>สวัสดีชาวโลก</seg></tuv>
+    </tu>
+    <tu>
+      <tuv xml:lang="en"><seg>Good morning</seg></tuv>
+      <tuv xml:lang="th"><seg>สวัสดีตอนเช้า</seg></tuv>
+    </tu>
+    <tu>
+      <tuv xml:lang="en"><seg>Thank you very much</seg></tuv>
+      <tuv xml:lang="th"><seg>ขอบคุณมาก</seg></tuv>
+    </tu>
+    <tu>
+      <tuv xml:lang="en"><seg>See you tomorrow</seg></tuv>
+      <tuv xml:lang="th"><seg>แล้วพบกันพรุ่งนี้</seg></tuv>
+    </tu>
+    <tu>
+      <tuv xml:lang="en"><seg>What is your name?</seg></tuv>
+      <tuv xml:lang="th"><seg>คุณชื่ออะไร</seg></tuv>
+    </tu>
+  </body>
+</tmx>

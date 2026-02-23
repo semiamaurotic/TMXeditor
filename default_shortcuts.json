@@ -1,0 +1,19 @@
+{
+    "file_open": "Ctrl+O",
+    "file_save": "Ctrl+S",
+    "file_save_as": "Ctrl+Shift+S",
+    "file_quit": "Ctrl+Q",
+    "edit_undo": "Ctrl+Z",
+    "edit_redo": "Ctrl+Shift+Z",
+    "edit_find": "Ctrl+F",
+    "edit_replace": "Ctrl+H",
+    "op_split": "Ctrl+T",
+    "op_merge": "Ctrl+M",
+    "op_move_up": "Ctrl+Up",
+    "op_move_down": "Ctrl+Down",
+    "op_edit_cell": "F2",
+    "op_delete_empty_row": "Ctrl+D",
+    "nav_next_row": "Down",
+    "nav_prev_row": "Up",
+    "nav_switch_column": "Tab"
+}

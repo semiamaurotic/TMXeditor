@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "tmxeditor"
+version = "0.1.0"
+description = "Desktop TMX 1.4b alignment editor for translation memory maintenance"
+requires-python = ">=3.10"
+dependencies = [
+    "PySide6>=6.5",
+    "lxml>=4.9",
+]
+
+[project.optional-dependencies]
+test = [
+    "pytest>=7.0",
+]
+
+[project.scripts]
+tmxeditor = "tmxeditor.main:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

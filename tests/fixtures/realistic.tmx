@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tmx version="1.4">
+  <header creationtool="RealisticFixture" creationtoolversion="1.0"
+          segtype="sentence" o-tmf="RealisticFixture"
+          adminlang="en" srclang="en" datatype="plaintext"/>
+  <body>
+    <tu><tuv xml:lang="en"><seg>The quick brown fox jumps over the lazy dog.</seg></tuv><tuv xml:lang="th"><seg>สุนัขจิ้งจอกสีน้ำตาลตัวเร็วกระโดดข้ามสุนัขขี้เกียจ</seg></tuv></tu>
+    <tu><tuv xml:lang="en"><seg>Machine translation has improved significantly in recent years.</seg></tuv><tuv xml:lang="th"><seg>การแปลด้วยเครื่องได้พัฒนาขึ้นอย่างมากในช่วงไม่กี่ปีที่ผ่านมา</seg></tuv></tu>
+    <tu><tuv xml:lang="en"><seg>Please review the attached document carefully.</seg></tuv><tuv xml:lang="th"><seg>กรุณาตรวจสอบเอกสารแนบอย่างระมัดระวัง</seg></tuv></tu>
+    <tu><tuv xml:lang="en"><seg>The meeting is scheduled for 3:00 PM.</seg></tuv><tuv xml:lang="th"><seg>การประชุมกำหนดไว้เวลา 15:00 น.</seg></tuv></tu>
+    <tu><tuv xml:lang="en"><seg>We need to finalize the budget by Friday.</seg></tuv><tuv xml:lang="th"><seg>เราต้องสรุปงบประมาณภายในวันศุกร์</seg></tuv></tu>
+    <tu><tuv xml:lang="en"><seg>Copyright © 2024 All rights reserved.</seg></tuv><tuv xml:lang="th"><seg>ลิขสิทธิ์ © 2024 สงวนลิขสิทธิ์</seg></tuv></tu>
+    <tu><tuv xml:lang="en"><seg>Terms &amp; Conditions apply.</seg></tuv><tuv xml:lang="th"><seg>ข้อกำหนดและเงื่อนไขมีผลบังคับใช้</seg></tuv></tu>
+    <tu><tuv xml:lang="en"><seg>For more information, visit our website.</seg></tuv><tuv xml:lang="th"><seg>สำหรับข้อมูลเพิ่มเติม กรุณาเยี่ยมชมเว็บไซต์ของเรา</seg></tuv></tu>
+    <tu><tuv xml:lang="en"><seg>Click "Submit" to confirm your order.</seg></tuv><tuv xml:lang="th"><seg>คลิก "ส่ง" เพื่อยืนยันคำสั่งซื้อของคุณ</seg></tuv></tu>
+    <tu><tuv xml:lang="en"><seg>Your password must contain at least 8 characters.</seg></tuv><tuv xml:lang="th"><seg>รหัสผ่านของคุณต้องมีอย่างน้อย 8 ตัวอักษร</seg></tuv></tu>
+    <tu><tuv xml:lang="en"><seg>Please enter a valid email address.</seg></tuv><tuv xml:lang="th"><seg>กรุณากรอกที่อยู่อีเมลที่ถูกต้อง</seg></tuv></tu>
+    <tu><tuv xml:lang="en"><seg>The system will restart automatically.</seg></tuv><tuv xml:lang="th"><seg>ระบบจะรีสตาร์ทโดยอัตโนมัติ</seg></tuv></tu>
+    <tu><tuv xml:lang="en"><seg>File not found. Please check the path.</seg></tuv><tuv xml:lang="th"><seg>ไม่พบไฟล์ กรุณาตรวจสอบเส้นทาง</seg></tuv></tu>
+    <tu><tuv xml:lang="en"><seg>An error occurred while processing your request.</seg></tuv><tuv xml:lang="th"><seg>เกิดข้อผิดพลาดขณะประมวลผลคำขอของคุณ</seg></tuv></tu>
+    <tu><tuv xml:lang="en"><seg>Do you want to save changes before closing?</seg></tuv><tuv xml:lang="th"><seg>คุณต้องการบันทึกการเปลี่ยนแปลงก่อนปิดหรือไม่</seg></tuv></tu>
+    <tu><tuv xml:lang="en"><seg>Loading... Please wait.</seg></tuv><tuv xml:lang="th"><seg>กำลังโหลด... กรุณารอสักครู่</seg></tuv></tu>
+    <tu><tuv xml:lang="en"><seg>Select all items that apply.</seg></tuv><tuv xml:lang="th"><seg>เลือกรายการทั้งหมดที่ตรงกัน</seg></tuv></tu>
+    <tu><tuv xml:lang="en"><seg>This action cannot be undone.</seg></tuv><tuv xml:lang="th"><seg>การกระทำนี้ไม่สามารถเลิกทำได้</seg></tuv></tu>
+    <tu><tuv xml:lang="en"><seg>Your session has expired. Please log in again.</seg></tuv><tuv xml:lang="th"><seg>เซสชันของคุณหมดอายุ กรุณาเข้าสู่ระบบอีกครั้ง</seg></tuv></tu>
+    <tu><tuv xml:lang="en"><seg>Update available. Download now?</seg></tuv><tuv xml:lang="th"><seg>มีอัปเดตใหม่ ดาวน์โหลดเลยหรือไม่</seg></tuv></tu>
+    <tu><tuv xml:lang="en"><seg>Operation completed successfully.</seg></tuv><tuv xml:lang="th"><seg>ดำเนินการเสร็จสมบูรณ์</seg></tuv></tu>
+    <tu><tuv xml:lang="en"><seg>Insufficient permissions to perform this action.</seg></tuv><tuv xml:lang="th"><seg>สิทธิ์ไม่เพียงพอในการดำเนินการนี้</seg></tuv></tu>
+    <tu><tuv xml:lang="en"><seg>Network connection lost. Retrying...</seg></tuv><tuv xml:lang="th"><seg>การเชื่อมต่อเครือข่ายขาด กำลังลองใหม่...</seg></tuv></tu>
+    <tu><tuv xml:lang="en"><seg>Search results: 42 items found.</seg></tuv><tuv xml:lang="th"><seg>ผลการค้นหา: พบ 42 รายการ</seg></tuv></tu>
+    <tu><tuv xml:lang="en"><seg>Drag and drop files here to upload.</seg></tuv><tuv xml:lang="th"><seg>ลากและวางไฟล์ที่นี่เพื่ออัปโหลด</seg></tuv></tu>
+    <tu><tuv xml:lang="en"><seg>Enable two-factor authentication for added security.</seg></tuv><tuv xml:lang="th"><seg>เปิดใช้งานการยืนยันตัวตนสองขั้นตอนเพื่อเพิ่มความปลอดภัย</seg></tuv></tu>
+    <tu><tuv xml:lang="en"><seg>Back up your data regularly.</seg></tuv><tuv xml:lang="th"><seg>สำรองข้อมูลของคุณอย่างสม่ำเสมอ</seg></tuv></tu>
+    <tu><tuv xml:lang="en"><seg>The temperature today is 27°C.</seg></tuv><tuv xml:lang="th"><seg>อุณหภูมิวันนี้ 27°C</seg></tuv></tu>
+    <tu><tuv xml:lang="en"><seg>Estimated delivery: 3-5 business days.</seg></tuv><tuv xml:lang="th"><seg>ระยะเวลาจัดส่งโดยประมาณ: 3-5 วันทำการ</seg></tuv></tu>
+    <tu><tuv xml:lang="en"><seg>Total: $49.99 (including tax)</seg></tuv><tuv xml:lang="th"><seg>รวม: $49.99 (รวมภาษี)</seg></tuv></tu>
+    <tu><tuv xml:lang="en"><seg>Press Ctrl+S to save your work.</seg></tuv><tuv xml:lang="th"><seg>กด Ctrl+S เพื่อบันทึกงานของคุณ</seg></tuv></tu>
+    <tu><tuv xml:lang="en"><seg>This feature is currently in beta.</seg></tuv><tuv xml:lang="th"><seg>ฟีเจอร์นี้อยู่ในช่วงเบต้า</seg></tuv></tu>
+    <tu><tuv xml:lang="en"><seg>Would you like to subscribe to our newsletter?</seg></tuv><tuv xml:lang="th"><seg>คุณต้องการสมัครรับจดหมายข่าวของเราหรือไม่</seg></tuv></tu>
+    <tu><tuv xml:lang="en"><seg>Rate your experience from 1 to 5 stars.</seg></tuv><tuv xml:lang="th"><seg>ให้คะแนนประสบการณ์ของคุณจาก 1 ถึง 5 ดาว</seg></tuv></tu>
+    <tu><tuv xml:lang="en"><seg>Privacy Policy last updated: January 2024.</seg></tuv><tuv xml:lang="th"><seg>นโยบายความเป็นส่วนตัวอัปเดตล่าสุด: มกราคม 2024</seg></tuv></tu>
+    <tu><tuv xml:lang="en"><seg>Cookies help us deliver our services.</seg></tuv><tuv xml:lang="th"><seg>คุกกี้ช่วยให้เราให้บริการได้ดีขึ้น</seg></tuv></tu>
+    <tu><tuv xml:lang="en"><seg>Accept all cookies</seg></tuv><tuv xml:lang="th"><seg>ยอมรับคุกกี้ทั้งหมด</seg></tuv></tu>
+    <tu><tuv xml:lang="en"><seg>Reject non-essential cookies</seg></tuv><tuv xml:lang="th"><seg>ปฏิเสธคุกกี้ที่ไม่จำเป็น</seg></tuv></tu>
+    <tu><tuv xml:lang="en"><seg>Light mode / Dark mode</seg></tuv><tuv xml:lang="th"><seg>โหมดสว่าง / โหมดมืด</seg></tuv></tu>
+    <tu><tuv xml:lang="en"><seg>Notifications (3 unread)</seg></tuv><tuv xml:lang="th"><seg>การแจ้งเตือน (ยังไม่ได้อ่าน 3 รายการ)</seg></tuv></tu>
+    <tu><tuv xml:lang="en"><seg>FAQ: Frequently Asked Questions</seg></tuv><tuv xml:lang="th"><seg>คำถามที่พบบ่อย</seg></tuv></tu>
+    <tu><tuv xml:lang="en"><seg>Contact us at support@example.com</seg></tuv><tuv xml:lang="th"><seg>ติดต่อเราที่ support@example.com</seg></tuv></tu>
+    <tu><tuv xml:lang="en"><seg>Version 2.3.1 — Release Notes</seg></tuv><tuv xml:lang="th"><seg>เวอร์ชัน 2.3.1 — บันทึกการเปลี่ยนแปลง</seg></tuv></tu>
+    <tu><tuv xml:lang="en"><seg>Bug fixes and performance improvements.</seg></tuv><tuv xml:lang="th"><seg>แก้ไขข้อบกพร่องและปรับปรุงประสิทธิภาพ</seg></tuv></tu>
+    <tu><tuv xml:lang="en"><seg>Memory usage: 256 MB / 1024 MB</seg></tuv><tuv xml:lang="th"><seg>การใช้หน่วยความจำ: 256 MB / 1024 MB</seg></tuv></tu>
+    <tu><tuv xml:lang="en"><seg>CPU load: 42%</seg></tuv><tuv xml:lang="th"><seg>ภาระ CPU: 42%</seg></tuv></tu>
+    <tu><tuv xml:lang="en"><seg>Disk space remaining: 128 GB</seg></tuv><tuv xml:lang="th"><seg>พื้นที่ดิสก์ที่เหลือ: 128 GB</seg></tuv></tu>
+    <tu><tuv xml:lang="en"><seg>Synchronizing data with cloud storage...</seg></tuv><tuv xml:lang="th"><seg>กำลังซิงโครไนซ์ข้อมูลกับที่เก็บข้อมูลบนคลาวด์...</seg></tuv></tu>
+    <tu><tuv xml:lang="en"><seg>All systems operational.</seg></tuv><tuv xml:lang="th"><seg>ทุกระบบทำงานปกติ</seg></tuv></tu>
+    <tu><tuv xml:lang="en"><seg>Scheduled maintenance: Sunday 02:00-06:00 UTC</seg></tuv><tuv xml:lang="th"><seg>การบำรุงรักษาตามกำหนด: วันอาทิตย์ 02:00-06:00 UTC</seg></tuv></tu>
+  </body>
+</tmx>
