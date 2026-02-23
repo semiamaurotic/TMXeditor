@@ -17,7 +17,7 @@ from PySide6.QtWidgets import (
 )
 
 from tmxeditor import config
-from tmxeditor.dialogs import EditDialog, FindReplaceDialog, SplitDialog
+from tmxeditor.dialogs import EditDialog, FindReplaceDialog, SettingsDialog, SplitDialog
 from tmxeditor.models import AlignmentDocument
 from tmxeditor.table_model import AlignmentTableModel
 from tmxeditor.table_view import AlignmentTableView
@@ -126,6 +126,19 @@ class MainWindow(QMainWindow):
 
         self._act_delete_empty = ops_menu.addAction("&Delete Empty Row", self._op_delete_empty_row)
         self._act_delete_empty.setShortcut(QKeySequence(self._sc("op_delete_empty_row")))
+
+        # View
+        view_menu = mb.addMenu("&View")
+        self._act_font_up = view_menu.addAction("Increase Column Font", self._font_increase)
+        self._act_font_up.setShortcut(QKeySequence("Ctrl+="))
+
+        self._act_font_down = view_menu.addAction("Decrease Column Font", self._font_decrease)
+        self._act_font_down.setShortcut(QKeySequence("Ctrl+-"))
+
+        # Settings
+        view_menu.addSeparator()
+        self._act_settings = view_menu.addAction("&Settings…", self._show_settings)
+        self._act_settings.setShortcut(QKeySequence("Ctrl+,"))
 
     def _build_toolbar(self) -> None:
         tb = QToolBar("Main")
@@ -512,3 +525,39 @@ class MainWindow(QMainWindow):
         """Update status bar on navigation."""
         super().keyPressEvent(event)
         self._update_status()
+
+    # ── Settings & Font Size ────────────────────────────────────
+
+    def _show_settings(self) -> None:
+        dlg = SettingsDialog(self)
+        if dlg.exec() == SettingsDialog.Accepted:
+            self._apply_settings()
+
+    def _apply_settings(self) -> None:
+        """Re-apply settings after the Settings dialog changes them."""
+        # Refresh the table to pick up new font sizes
+        self._model.notify_data_changed()
+        self._view.viewport().update()
+        self._update_status()
+        # Note: shortcut changes require restart for menu accelerators
+        # (the Settings dialog saves to disk; they take effect next launch)
+
+    def _font_increase(self) -> None:
+        row = self._view.current_row()
+        col = self._view.current_col()
+        col_name = "source" if col == 0 else "target"
+        current = config.get_font_size(col_name)
+        config.set_font_size(col_name, current + 1)
+        config.save_settings()
+        self._model.notify_data_changed()
+        self._view.select_cell(row, col)
+
+    def _font_decrease(self) -> None:
+        row = self._view.current_row()
+        col = self._view.current_col()
+        col_name = "source" if col == 0 else "target"
+        current = config.get_font_size(col_name)
+        config.set_font_size(col_name, current - 1)
+        config.save_settings()
+        self._model.notify_data_changed()
+        self._view.select_cell(row, col)

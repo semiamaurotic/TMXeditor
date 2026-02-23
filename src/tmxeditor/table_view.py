@@ -115,7 +115,10 @@ class _CellEditor(QPlainTextEdit):
 
 
 class _InlineCursorDelegate(QStyledItemDelegate):
-    """Delegate that creates inline cell editors for cursor positioning."""
+    """Delegate that creates inline cell editors for cursor positioning.
+    
+    Supports per-column font sizes via config.get_font_size().
+    """
 
     _MIN_ROW_HEIGHT = 40
 
@@ -128,11 +131,20 @@ class _InlineCursorDelegate(QStyledItemDelegate):
         self._current_index = None
         self._original_text = ""
 
+    def _font_size_for_col(self, col: int) -> int:
+        from tmxeditor import config
+        return config.get_font_size("source" if col == 0 else "target")
+
     def createEditor(self, parent, option, index):
         editor = _CellEditor(parent)
         self._original_text = index.data(Qt.DisplayRole) or ""
         self._current_index = index
         self._current_editor = editor
+
+        # Apply per-column font size
+        font = editor.font()
+        font.setPointSize(self._font_size_for_col(index.column()))
+        editor.setFont(font)
 
         row = index.row()
         col = index.column()
@@ -167,7 +179,16 @@ class _InlineCursorDelegate(QStyledItemDelegate):
     def updateEditorGeometry(self, editor, option, index):
         editor.setGeometry(option.rect)
 
+    def initStyleOption(self, option, index):
+        """Apply per-column font size in the painted (non-editing) cells."""
+        super().initStyleOption(option, index)
+        font = option.font
+        font.setPointSize(self._font_size_for_col(index.column()))
+        option.font = font
+
     def sizeHint(self, option, index):
+        # Use per-column font size for size calculation
+        option.font.setPointSize(self._font_size_for_col(index.column()))
         hint = super().sizeHint(option, index)
         if hint.height() < self._MIN_ROW_HEIGHT:
             hint.setHeight(self._MIN_ROW_HEIGHT)
@@ -236,6 +257,9 @@ class AlignmentTableView(QTableView):
                 gridline-color: #d0d0d0;
                 selection-background-color: #cce5ff;
                 selection-color: #000;
+            }
+            QTableView::item {
+                padding: 6px 8px;
             }
             QTableView::item:focus {
                 border: 2px solid #0078d4;

@@ -1,19 +1,27 @@
-"""Modal dialogs for cell editing, find/replace, and split positioning."""
+"""Modal dialogs for cell editing, find/replace, split, and settings."""
 
 from __future__ import annotations
 
 from PySide6.QtCore import Qt
+from PySide6.QtGui import QKeySequence
 from PySide6.QtWidgets import (
+    QCheckBox,
     QDialog,
     QDialogButtonBox,
+    QFormLayout,
+    QGroupBox,
     QHBoxLayout,
+    QKeySequenceEdit,
     QLabel,
     QLineEdit,
+    QMessageBox,
     QPushButton,
+    QScrollArea,
+    QSpinBox,
+    QTabWidget,
     QTextEdit,
     QVBoxLayout,
-    QCheckBox,
-    QMessageBox,
+    QWidget,
 )
 
 
@@ -179,3 +187,126 @@ class FindReplaceDialog(QDialog):
         close_btn = QPushButton("Close")
         close_btn.clicked.connect(self.close)
         layout.addWidget(close_btn, alignment=Qt.AlignRight)
+
+
+# ── Settings Dialog ────────────────────────────────────────────
+
+
+class SettingsDialog(QDialog):
+    """Settings pane with tabs for keyboard shortcuts and display.
+
+    Shortcuts use QKeySequenceEdit so the user just presses the
+    desired key combination — no special syntax needed.
+    """
+
+    def __init__(self, parent=None):
+        from tmxeditor import config  # deferred to avoid circular import
+
+        super().__init__(parent)
+        self.setWindowTitle("Settings")
+        self.setMinimumSize(550, 480)
+
+        self._config = config
+        layout = QVBoxLayout(self)
+
+        tabs = QTabWidget()
+        layout.addWidget(tabs)
+
+        # ── Tab 1: Keyboard Shortcuts ───────────────────
+        shortcuts_tab = QWidget()
+        shortcuts_layout = QVBoxLayout(shortcuts_tab)
+
+        hint = QLabel(
+            "Click a shortcut field, then press the key combination you want."
+        )
+        hint.setWordWrap(True)
+        hint.setStyleSheet("color: #666; margin-bottom: 8px;")
+        shortcuts_layout.addWidget(hint)
+
+        # Scrollable area for the shortcuts
+        scroll = QScrollArea()
+        scroll.setWidgetResizable(True)
+        scroll_widget = QWidget()
+        form = QFormLayout(scroll_widget)
+        form.setFieldGrowthPolicy(QFormLayout.ExpandingFieldsGrow)
+
+        self._shortcut_edits: dict[str, QKeySequenceEdit] = {}
+        current_shortcuts = config.get_shortcuts()
+
+        for action_id, label in config.ACTION_LABELS.items():
+            edit = QKeySequenceEdit()
+            current = current_shortcuts.get(action_id, "")
+            if current:
+                edit.setKeySequence(QKeySequence(current))
+            self._shortcut_edits[action_id] = edit
+            form.addRow(label + ":", edit)
+
+        scroll.setWidget(scroll_widget)
+        shortcuts_layout.addWidget(scroll)
+
+        # Reset to defaults button
+        reset_btn = QPushButton("Reset All to Defaults")
+        reset_btn.clicked.connect(self._reset_shortcuts)
+        shortcuts_layout.addWidget(reset_btn, alignment=Qt.AlignLeft)
+
+        tabs.addTab(shortcuts_tab, "Keyboard Shortcuts")
+
+        # ── Tab 2: Display ──────────────────────────────
+        display_tab = QWidget()
+        display_layout = QVBoxLayout(display_tab)
+
+        font_group = QGroupBox("Column Font Sizes")
+        font_form = QFormLayout(font_group)
+
+        self._source_font_spin = QSpinBox()
+        self._source_font_spin.setRange(config.MIN_FONT_SIZE, config.MAX_FONT_SIZE)
+        self._source_font_spin.setValue(config.get_font_size("source"))
+        self._source_font_spin.setSuffix(" pt")
+        font_form.addRow("Source column:", self._source_font_spin)
+
+        self._target_font_spin = QSpinBox()
+        self._target_font_spin.setRange(config.MIN_FONT_SIZE, config.MAX_FONT_SIZE)
+        self._target_font_spin.setValue(config.get_font_size("target"))
+        self._target_font_spin.setSuffix(" pt")
+        font_form.addRow("Target column:", self._target_font_spin)
+
+        display_layout.addWidget(font_group)
+        display_layout.addStretch()
+
+        tabs.addTab(display_tab, "Display")
+
+        # ── OK / Cancel ─────────────────────────────────
+        buttons = QDialogButtonBox(
+            QDialogButtonBox.Ok | QDialogButtonBox.Cancel
+        )
+        buttons.accepted.connect(self._accept)
+        buttons.rejected.connect(self.reject)
+        layout.addWidget(buttons)
+
+    def _reset_shortcuts(self) -> None:
+        """Reset all shortcut fields to built-in defaults."""
+        defaults = self._config._load_defaults()
+        for action_id, edit in self._shortcut_edits.items():
+            default_seq = defaults.get(action_id, "")
+            if default_seq:
+                edit.setKeySequence(QKeySequence(default_seq))
+            else:
+                edit.clear()
+
+    def _accept(self) -> None:
+        # Collect shortcuts
+        new_shortcuts = {}
+        for action_id, edit in self._shortcut_edits.items():
+            seq = edit.keySequence()
+            new_shortcuts[action_id] = seq.toString() if not seq.isEmpty() else ""
+
+        self._config.set_shortcuts(new_shortcuts)
+
+        # Collect font sizes
+        self._config.set_font_size("source", self._source_font_spin.value())
+        self._config.set_font_size("target", self._target_font_spin.value())
+
+        # Persist to disk
+        self._config.save_settings()
+
+        self.accept()
