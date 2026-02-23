@@ -260,7 +260,7 @@ class AlignmentTableView(QTableView):
         return idx.column() if idx.isValid() else 0
 
     def select_cell(self, row: int, col: int) -> None:
-        """Move selection to a specific cell."""
+        """Move selection to a specific cell and restore focus."""
         model = self.model()
         if model is None:
             return
@@ -268,3 +268,15 @@ class AlignmentTableView(QTableView):
             idx = model.index(row, col)
             self.setCurrentIndex(idx)
             self.scrollTo(idx)
+            # Ensure the table view has keyboard focus so arrow keys work
+            self.setFocus(Qt.OtherFocusReason)
+
+    def keyPressEvent(self, event) -> None:
+        """Enter/Return opens the inline cursor editor for splitting."""
+        if event.key() in (Qt.Key_Return, Qt.Key_Enter):
+            idx = self.currentIndex()
+            if idx.isValid() and self.state() != QAbstractItemView.EditingState:
+                self.edit(idx)
+                event.accept()
+                return
+        super().keyPressEvent(event)
