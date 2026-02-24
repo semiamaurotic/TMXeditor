@@ -55,9 +55,11 @@ def main() -> None:
     
     window = MainWindow()
     
+    from PySide6.QtCore import QObject
+    
     # macOS: Install an event filter on the QApplication
     # This is a safer alternative to subclassing QApplication when testing/embedded
-    class MacFileOpenFilter(QEvent):
+    class MacFileOpenFilter(QObject):
         def eventFilter(self, obj, event):
             if event.type() == QEvent.Type.FileOpen:
                 file_path = event.file()
@@ -69,7 +71,7 @@ def main() -> None:
             return False
             
     # Keep reference to avoid garbage collection
-    mac_filter = type('Filter', (QEvent,), {'eventFilter': MacFileOpenFilter.eventFilter})()
+    mac_filter = MacFileOpenFilter()
     app.installEventFilter(mac_filter)
 
     # Windows / CLI: Check command line arguments
