@@ -45,7 +45,7 @@ jobs:
         if: matrix.os == 'macos-latest'
         run: |
           cd dist
-          zip -r ../${{ matrix.artifact_name }}.zip TMXeditor.app
+          zip -ry ../${{ matrix.artifact_name }}.zip TMXeditor.app
           cd ..
 
       - name: Archive Windows exe
