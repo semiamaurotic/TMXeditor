@@ -9,14 +9,12 @@ Provides:
 
 from __future__ import annotations
 
-from PySide6.QtCore import Qt, Signal, QEvent, QTimer
-from PySide6.QtGui import QKeySequence, QPalette, QColor
+from PySide6.QtCore import Qt, Signal
 from PySide6.QtWidgets import (
     QAbstractItemView,
     QHeaderView,
     QPlainTextEdit,
     QStyledItemDelegate,
-    QStyleOptionViewItem,
     QTableView,
     QWidget,
 )
@@ -253,7 +251,6 @@ class AlignmentTableView(QTableView):
         self.setStyleSheet(
             """
             QTableView {
-                font-size: 14px;
                 gridline-color: #d0d0d0;
                 selection-background-color: #cce5ff;
                 selection-color: #000;

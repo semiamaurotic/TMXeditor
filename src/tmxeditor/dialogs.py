@@ -100,7 +100,7 @@ class SplitDialog(QDialog):
         self._editor = QTextEdit()
         self._editor.setPlainText(text)
         self._editor.setAcceptRichText(False)
-        self._editor.setReadOnly(False)  # cursor can move but text can't change visually
+        self._editor.setReadOnly(False)  # writable so cursor blinks; _revert_text prevents actual changes
         layout.addWidget(self._editor)
 
         # Prevent actual text changes (we only want cursor positioning)

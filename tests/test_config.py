@@ -18,6 +18,9 @@ class TestConfig:
         assert config.get_shortcut("__nonexistent__") == ""
 
     def test_font_size_defaults(self):
+        # Reset to defaults for this test (user settings may differ)
+        config.set_font_size("source", config.DEFAULT_FONT_SIZE)
+        config.set_font_size("target", config.DEFAULT_FONT_SIZE)
         assert config.get_font_size("source") == config.DEFAULT_FONT_SIZE
         assert config.get_font_size("target") == config.DEFAULT_FONT_SIZE
 

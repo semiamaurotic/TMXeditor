@@ -23,5 +23,8 @@ tmxeditor = "tmxeditor.main:main"
 [tool.setuptools.packages.find]
 where = ["src"]
 
+[tool.setuptools.package-data]
+tmxeditor = ["default_shortcuts.json"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]

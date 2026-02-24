@@ -28,6 +28,11 @@ def malformed_tmx_path() -> Path:
 
 
 @pytest.fixture
+def metadata_tmx_path() -> Path:
+    return FIXTURES_DIR / "metadata.tmx"
+
+
+@pytest.fixture
 def small_doc(small_tmx_path: Path) -> AlignmentDocument:
     return parse_tmx(small_tmx_path)
 

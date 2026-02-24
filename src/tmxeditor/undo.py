@@ -4,6 +4,9 @@ Each command is a QUndoCommand subclass that knows how to apply (redo)
 and reverse (undo) a single atomic operation on an AlignmentDocument.
 The commands do **not** touch the UI directly — they mutate the document
 and the caller is responsible for signalling the table model to refresh.
+
+All commands include pre-condition assertions to detect undo-stack
+corruption early rather than silently corrupting data.
 """
 
 from __future__ import annotations
@@ -46,8 +49,20 @@ class SplitCommand(QUndoCommand):
         self._filled_existing: bool = False  # True if we filled a blank below
         self._new_row: AlignmentRow | None = None
 
+    @property
+    def filled_existing(self) -> bool:
+        """Whether the split filled an existing blank cell (vs inserting a row)."""
+        return self._filled_existing
+
     def redo(self) -> None:
         from tmxeditor.models import AlignmentRow
+
+        # Pre-condition: cell content must match what we expect
+        actual = self._doc.get_cell(self._row, self._col)
+        assert actual == self._original_text, (
+            f"Split integrity: row {self._row} col {self._col} "
+            f"expected '{self._original_text}', got '{actual}'"
+        )
 
         left = self._original_text[: self._pos]
         right = self._original_text[self._pos :]
@@ -122,6 +137,13 @@ class MergeCommand(QUndoCommand):
         self._removed_row: AlignmentRow | None = None
 
     def redo(self) -> None:
+        # Pre-condition check
+        actual = self._doc.get_cell(self._row, self._col)
+        assert actual == self._orig_active, (
+            f"Merge integrity: row {self._row} col {self._col} "
+            f"expected '{self._orig_active}', got '{actual}'"
+        )
+
         next_row_idx = self._row + 1
 
         # Active column: concatenate with sensible join
@@ -216,6 +238,11 @@ class EditCellCommand(QUndoCommand):
         self._new = new_text
 
     def redo(self) -> None:
+        actual = self._doc.get_cell(self._row, self._col)
+        assert actual == self._old, (
+            f"Edit integrity: row {self._row} col {self._col} "
+            f"expected '{self._old}', got '{actual}'"
+        )
         self._doc.set_cell(self._row, self._col, self._new)
 
     def undo(self) -> None:
@@ -238,6 +265,13 @@ class DeleteEmptyRowCommand(QUndoCommand):
         self._removed_row: AlignmentRow | None = None
 
     def redo(self) -> None:
+        # Pre-condition: both cells must be empty
+        src = self._doc.get_cell(self._row, 0)
+        tgt = self._doc.get_cell(self._row, 1)
+        assert not src and not tgt, (
+            f"DeleteEmptyRow integrity: row {self._row} is not empty "
+            f"(source='{src}', target='{tgt}')"
+        )
         self._removed_row = self._doc.rows[self._row]
         self._doc.remove_row(self._row)
 

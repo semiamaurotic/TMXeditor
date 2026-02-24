@@ -6,16 +6,17 @@ Loads/saves shortcuts and per-column font sizes from
 
 from __future__ import annotations
 
+import importlib.resources
 import json
 from pathlib import Path
 
-_DEFAULTS_PATH = Path(__file__).resolve().parent.parent.parent / "default_shortcuts.json"
 _USER_CONFIG_DIR = Path.home() / ".tmxeditor"
 _USER_SETTINGS_PATH = _USER_CONFIG_DIR / "settings.json"
 
 # Legacy path (shortcuts only)
 _USER_SHORTCUTS_PATH = _USER_CONFIG_DIR / "shortcuts.json"
 
+_loaded: bool = False
 _shortcuts: dict[str, str] = {}
 _font_sizes: dict[str, int] = {}  # "source" / "target" → pt size
 
@@ -43,11 +44,17 @@ ACTION_LABELS: dict[str, str] = {
 
 
 def _load_defaults() -> dict[str, str]:
-    """Load the bundled default shortcuts."""
-    if _DEFAULTS_PATH.exists():
-        with open(_DEFAULTS_PATH, encoding="utf-8") as f:
-            return json.load(f)
-    return {}
+    """Load the bundled default shortcuts using importlib.resources.
+
+    Works whether the package is run from source or installed as a wheel.
+    """
+    try:
+        ref = importlib.resources.files("tmxeditor").joinpath("default_shortcuts.json")
+        with importlib.resources.as_file(ref) as p:
+            with open(p, encoding="utf-8") as f:
+                return json.load(f)
+    except (FileNotFoundError, TypeError):
+        return {}
 
 
 def _load_settings() -> dict:
@@ -64,7 +71,7 @@ def _load_settings() -> dict:
 
 def _load() -> None:
     """Load and merge default + user configs."""
-    global _shortcuts, _font_sizes
+    global _shortcuts, _font_sizes, _loaded
     defaults = _load_defaults()
     user = _load_settings()
 
@@ -83,6 +90,8 @@ def _load() -> None:
             if key in user["font_sizes"]:
                 _font_sizes[key] = max(MIN_FONT_SIZE, min(MAX_FONT_SIZE, user["font_sizes"][key]))
 
+    _loaded = True
+
 
 def save_settings() -> None:
     """Persist current shortcuts and font sizes to disk."""
@@ -97,7 +106,7 @@ def save_settings() -> None:
 
 def get_shortcuts() -> dict[str, str]:
     """Return the full shortcut mapping (cached after first call)."""
-    if not _shortcuts:
+    if not _loaded:
         _load()
     return _shortcuts
 
@@ -115,14 +124,14 @@ def set_shortcuts(mapping: dict[str, str]) -> None:
 
 def get_font_size(column: str) -> int:
     """Return font size for 'source' or 'target' column."""
-    if not _font_sizes:
+    if not _loaded:
         _load()
     return _font_sizes.get(column, DEFAULT_FONT_SIZE)
 
 
 def set_font_size(column: str, size: int) -> None:
     """Set font size for 'source' or 'target' column."""
-    if not _font_sizes:
+    if not _loaded:
         _load()
     _font_sizes[column] = max(MIN_FONT_SIZE, min(MAX_FONT_SIZE, size))
 

@@ -2,11 +2,10 @@
 
 from __future__ import annotations
 
-import os
 from pathlib import Path
 
-from PySide6.QtCore import Qt, QModelIndex
-from PySide6.QtGui import QAction, QKeySequence, QUndoStack
+from PySide6.QtCore import Qt
+from PySide6.QtGui import QKeySequence, QUndoStack
 from PySide6.QtWidgets import (
     QApplication,
     QFileDialog,
@@ -63,6 +62,8 @@ class MainWindow(QMainWindow):
 
         # Track undo stack state for dirty flag
         self._undo_stack.cleanChanged.connect(self._on_clean_changed)
+        # Refresh the view after any undo/redo operation
+        self._undo_stack.indexChanged.connect(self._on_undo_redo)
 
         self._update_status()
 
@@ -147,9 +148,7 @@ class MainWindow(QMainWindow):
         tb.addAction(self._act_open)
         tb.addAction(self._act_save)
         tb.addSeparator()
-        self._act_undo_split = tb.addAction("Undo Split")
-        self._act_undo_split.setShortcut(QKeySequence(self._sc("edit_undo")))
-        self._act_undo_split.triggered.connect(self._undo_stack.undo)
+        tb.addAction(self._act_undo)
         tb.addAction(self._act_redo)
         tb.addSeparator()
         tb.addAction(self._act_split)
@@ -180,6 +179,11 @@ class MainWindow(QMainWindow):
     def _on_clean_changed(self, clean: bool) -> None:
         self._dirty = not clean
         self._update_title()
+        self._update_status()
+
+    def _on_undo_redo(self, _idx: int) -> None:
+        """Refresh the view after any undo/redo operation."""
+        self._model.notify_data_changed()
         self._update_status()
 
     def _update_title(self) -> None:
@@ -266,9 +270,8 @@ class MainWindow(QMainWindow):
             return
         cmd = SplitCommand(self._doc, row, col, pos)
         self._push_cmd(cmd)
-        # Close any open editor and select the new cell
-        self._view.closePersistentEditor(self._model.index(row, col))
-        self._view.select_cell(row + 1 if not cmd._filled_existing else row + 1, col)
+        # Select the cell that received the right part of the split
+        self._view.select_cell(row + 1, col)
 
     def _on_inline_edit(self, row: int, col: int, old_text: str, new_text: str) -> None:
         """Called when user confirms an inline text edit (F2 → type → Enter)."""
@@ -484,6 +487,8 @@ class MainWindow(QMainWindow):
             return
         case = self._find_dialog.case_sensitive.isChecked()
         count = 0
+        # Group all replacements into a single undo step
+        self._undo_stack.beginMacro("Replace All")
         for r in range(self._doc.row_count()):
             for c in range(2):
                 text = self._doc.get_cell(r, c)
@@ -506,6 +511,7 @@ class MainWindow(QMainWindow):
                         cmd = EditCellCommand(self._doc, r, c, text, new_text)
                         self._undo_stack.push(cmd)
                         count += 1
+        self._undo_stack.endMacro()
         if count > 0:
             self._model.notify_data_changed()
             self._update_status()
