@@ -19,6 +19,7 @@ _USER_SHORTCUTS_PATH = _USER_CONFIG_DIR / "shortcuts.json"
 _loaded: bool = False
 _shortcuts: dict[str, str] = {}
 _font_sizes: dict[str, int] = {}  # "source" / "target" → pt size
+_display: dict[str, object] = {}  # "word_wrap", "column_ratio", etc.
 
 DEFAULT_FONT_SIZE = 14
 MIN_FONT_SIZE = 8
@@ -90,6 +91,14 @@ def _load() -> None:
             if key in user["font_sizes"]:
                 _font_sizes[key] = max(MIN_FONT_SIZE, min(MAX_FONT_SIZE, user["font_sizes"][key]))
 
+    # Display settings
+    _display = {
+        "word_wrap": True,
+        "column_ratio": 0.5,
+    }
+    if "display" in user:
+        _display.update(user["display"])
+
     _loaded = True
 
 
@@ -99,6 +108,7 @@ def save_settings() -> None:
     data = {
         "shortcuts": _shortcuts,
         "font_sizes": _font_sizes,
+        "display": _display,
     }
     with open(_USER_SETTINGS_PATH, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=2, ensure_ascii=False)
@@ -139,3 +149,17 @@ def set_font_size(column: str, size: int) -> None:
 def reload() -> None:
     """Force re-read of config files."""
     _load()
+
+
+def get_display(key: str, default=None):
+    """Return a display setting value."""
+    if not _loaded:
+        _load()
+    return _display.get(key, default)
+
+
+def set_display(key: str, value) -> None:
+    """Set a display setting value."""
+    if not _loaded:
+        _load()
+    _display[key] = value

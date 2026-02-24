@@ -9,7 +9,8 @@ Provides:
 
 from __future__ import annotations
 
-from PySide6.QtCore import Qt, Signal
+from PySide6.QtCore import Qt, Signal, QSize, QRectF, QTimer
+from PySide6.QtGui import QTextOption, QTextDocument
 from PySide6.QtWidgets import (
     QAbstractItemView,
     QHeaderView,
@@ -47,6 +48,7 @@ class _CellEditor(QPlainTextEdit):
         self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setCursorWidth(2)
+        self.setWordWrapMode(QTextOption.WrapAtWordBoundaryOrAnywhere)
         self.setStyleSheet("QPlainTextEdit { padding: 4px; }")
         # Revert any text changes that happen in cursor-only mode
         self.textChanged.connect(self._on_text_changed)
@@ -184,13 +186,70 @@ class _InlineCursorDelegate(QStyledItemDelegate):
         font.setPointSize(self._font_size_for_col(index.column()))
         option.font = font
 
+    def _wrap_mode(self):
+        """Return the active QTextOption wrap mode based on config.
+
+        When 'word_wrap' is True (default): WrapAtWordBoundaryOrAnywhere
+          — wraps at spaces for English, falls back to character breaks
+            for Thai/CJK (no spaces).
+        When False: WrapAtWordBoundary
+          — wraps only at spaces/word boundaries. Thai text without
+            spaces will extend beyond the cell width.
+        """
+        from tmxeditor import config
+        if config.get_display("word_wrap", True):
+            return QTextOption.WrapAtWordBoundaryOrAnywhere
+        return QTextOption.WordWrap
+
     def sizeHint(self, option, index):
-        # Use per-column font size for size calculation
-        option.font.setPointSize(self._font_size_for_col(index.column()))
-        hint = super().sizeHint(option, index)
-        if hint.height() < self._MIN_ROW_HEIGHT:
-            hint.setHeight(self._MIN_ROW_HEIGHT)
-        return hint
+        """Calculate cell height using QTextDocument for proper text wrapping."""
+        text = index.data(Qt.DisplayRole) or ""
+        if not text:
+            return QSize(option.rect.width(), self._MIN_ROW_HEIGHT)
+
+        font = option.font
+        font.setPointSize(self._font_size_for_col(index.column()))
+
+        doc = QTextDocument()
+        doc.setDefaultFont(font)
+        text_option = QTextOption()
+        text_option.setWrapMode(self._wrap_mode())
+        doc.setDefaultTextOption(text_option)
+        doc.setPlainText(text)
+
+        # Use available column width (minus padding)
+        width = option.rect.width() if option.rect.width() > 0 else 300
+        doc.setTextWidth(max(width - 16, 50))  # 16px for padding (8px each side)
+
+        height = int(doc.size().height()) + 12  # 12px for top/bottom padding
+        return QSize(width, max(height, self._MIN_ROW_HEIGHT))
+
+    def paint(self, painter, option, index):
+        """Paint cell text with proper word wrapping for Thai/CJK."""
+        # Let the default style draw selection/focus/background
+        self.initStyleOption(option, index)
+        style = option.widget.style() if option.widget else None
+        if style:
+            # Draw background and focus rect, but NOT the text
+            option.text = ""
+            style.drawControl(style.ControlElement.CE_ItemViewItem, option, painter, option.widget)
+
+        text = index.data(Qt.DisplayRole) or ""
+        if not text:
+            return
+
+        doc = QTextDocument()
+        doc.setDefaultFont(option.font)
+        text_option = QTextOption()
+        text_option.setWrapMode(self._wrap_mode())
+        doc.setDefaultTextOption(text_option)
+        doc.setPlainText(text)
+        doc.setTextWidth(max(option.rect.width() - 16, 50))
+
+        painter.save()
+        painter.translate(option.rect.left() + 8, option.rect.top() + 6)
+        doc.drawContents(painter)
+        painter.restore()
 
     def _on_edit_confirmed(self, row, col, new_text):
         if new_text != self._original_text:
@@ -237,15 +296,21 @@ class AlignmentTableView(QTableView):
         self._delegate.edit_confirmed.connect(self.inline_edit_confirmed.emit)
         self.setItemDelegate(self._delegate)
 
-        # Column sizing — stretch equally
+        # Column sizing — col 0 interactive, col 1 stretches to fill
         header = self.horizontalHeader()
         header.setStretchLastSection(True)
-        header.setSectionResizeMode(QHeaderView.Stretch)
+        header.setSectionResizeMode(0, QHeaderView.Interactive)
+
+        # Apply word wrap from config
+        self._apply_word_wrap()
 
         # Vertical header (row numbers)
         vheader = self.verticalHeader()
         vheader.setDefaultSectionSize(44)
         vheader.setSectionResizeMode(QHeaderView.ResizeToContents)
+
+        # Reflow row heights when column is resized
+        header.sectionResized.connect(self._on_column_resized)
 
         # Styling
         self.setStyleSheet(
@@ -269,6 +334,53 @@ class AlignmentTableView(QTableView):
             }
             """
         )
+
+    # ── Word wrap & column sizing helpers ───────────────────────
+
+    def _apply_word_wrap(self) -> None:
+        """Apply the word wrap setting from config."""
+        from tmxeditor import config
+        wrap = config.get_display("word_wrap", True)
+        self.setWordWrap(wrap)
+        # Reflow row heights immediately (user toggled setting)
+        self._reflow_rows()
+
+    def _reflow_rows(self) -> None:
+        """Force recalculation of all visible row heights."""
+        vheader = self.verticalHeader()
+        vheader.setSectionResizeMode(QHeaderView.ResizeToContents)
+
+    def _freeze_row_heights(self) -> None:
+        """Lock row heights to current values during resize for performance."""
+        vheader = self.verticalHeader()
+        if vheader.sectionResizeMode(0) != QHeaderView.Fixed:
+            vheader.setSectionResizeMode(QHeaderView.Fixed)
+
+    def _schedule_reflow(self) -> None:
+        """Debounced reflow — freezes rows during resize, recalculates when stable."""
+        self._freeze_row_heights()
+        if not hasattr(self, "_reflow_timer"):
+            self._reflow_timer = QTimer(self)
+            self._reflow_timer.setSingleShot(True)
+            self._reflow_timer.setInterval(150)
+            self._reflow_timer.timeout.connect(self._reflow_rows)
+        self._reflow_timer.start()
+
+    def _on_column_resized(self, _logical_index: int, _old_size: int, _new_size: int) -> None:
+        """Reflow row heights when user drags the column divider."""
+        self._schedule_reflow()
+
+    def resizeEvent(self, event) -> None:
+        """On window resize, apply column ratio and schedule deferred reflow."""
+        super().resizeEvent(event)
+        from tmxeditor import config
+        header = self.horizontalHeader()
+        total = self.viewport().width()
+        if total > 0 and self.model() and self.model().columnCount() >= 2:
+            ratio = config.get_display("column_ratio", 0.5)
+            col0_width = int(total * ratio)
+            header.resizeSection(0, col0_width)
+        self._schedule_reflow()
 
     # ── Navigation helpers ──────────────────────────────────────
 

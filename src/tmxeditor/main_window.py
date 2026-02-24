@@ -130,6 +130,12 @@ class MainWindow(QMainWindow):
 
         # View
         view_menu = mb.addMenu("&View")
+
+        self._act_word_wrap = view_menu.addAction("Allow Wrapping Within Words", self._toggle_word_wrap)
+        self._act_word_wrap.setCheckable(True)
+        self._act_word_wrap.setChecked(config.get_display("word_wrap", True))
+
+        view_menu.addSeparator()
         self._act_font_up = view_menu.addAction("Increase Column Font", self._font_increase)
         self._act_font_up.setShortcut(QKeySequence("Ctrl+="))
 
@@ -543,10 +549,19 @@ class MainWindow(QMainWindow):
         """Re-apply settings after the Settings dialog changes them."""
         # Refresh the table to pick up new font sizes
         self._model.notify_data_changed()
+        self._view._apply_word_wrap()
         self._view.viewport().update()
         self._update_status()
         # Note: shortcut changes require restart for menu accelerators
         # (the Settings dialog saves to disk; they take effect next launch)
+
+    def _toggle_word_wrap(self) -> None:
+        """Toggle word wrap on/off and persist the setting."""
+        wrap = self._act_word_wrap.isChecked()
+        config.set_display("word_wrap", wrap)
+        config.save_settings()
+        self._view._apply_word_wrap()
+        self._model.notify_data_changed()
 
     def _font_increase(self) -> None:
         row = self._view.current_row()
