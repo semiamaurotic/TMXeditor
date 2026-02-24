@@ -5,14 +5,16 @@ from __future__ import annotations
 from pathlib import Path
 
 from PySide6.QtCore import Qt
-from PySide6.QtGui import QKeySequence, QUndoStack
+from PySide6.QtGui import QIcon, QKeySequence, QPixmap, QTransform, QUndoStack
 from PySide6.QtWidgets import (
     QApplication,
     QFileDialog,
     QMainWindow,
     QMessageBox,
+    QSizePolicy,
     QStatusBar,
     QToolBar,
+    QWidget,
 )
 
 from tmxeditor import config
@@ -150,10 +152,43 @@ class MainWindow(QMainWindow):
     def _build_toolbar(self) -> None:
         tb = QToolBar("Main")
         tb.setMovable(False)
+        tb.setToolButtonStyle(Qt.ToolButtonIconOnly)
         self.addToolBar(tb)
+        self.setUnifiedTitleAndToolBarOnMac(True)
+
+        # Use native SF Symbols (macOS) via QIcon.fromTheme (PySide6 6.7+)
+        # Tuples: (action, sf_name, label, shortcut_key, rotation_degrees)
+        icon_actions = [
+            (self._act_open, "folder", "Open File", "file_open", 0),
+            (self._act_save, "arrow.down.doc", "Save", "file_save", 0),
+            (self._act_undo, "arrow.uturn.backward", "Undo", "edit_undo", 0),
+            (self._act_redo, "arrow.uturn.forward", "Redo", "edit_redo", 0),
+            (self._act_split, "square.and.line.vertical.and.square", "Split Cell", "op_split", 90),
+            (self._act_merge, "arrow.triangle.merge", "Merge with Next", "op_merge", 180),
+            (self._act_move_up, "arrow.up", "Move Cell Up", "op_move_up", 0),
+            (self._act_move_down, "arrow.down", "Move Cell Down", "op_move_down", 0),
+            (self._act_edit, "pencil", "Edit Cell", "op_edit_cell", 0),
+            (self._act_delete_empty, "delete.left", "Delete Empty Row", "op_delete_empty_row", 0),
+        ]
+        for action, sf_name, label, sc_key, rotation in icon_actions:
+            icon = QIcon.fromTheme(sf_name)
+            if rotation:
+                icon = self._rotated_icon(icon, rotation)
+            action.setIcon(icon)
+            shortcut = self._mac_shortcut(self._sc(sc_key))
+            tip = f"{label} ({shortcut})" if shortcut else label
+            action.setToolTip(tip)
+
+        # Helper to create an expanding spacer
+        def _spacer() -> QWidget:
+            w = QWidget()
+            w.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
+            return w
+
+        # Layout: Open+Save (left) | spacer | center group | spacer | Edit+Delete (right)
         tb.addAction(self._act_open)
         tb.addAction(self._act_save)
-        tb.addSeparator()
+        tb.addWidget(_spacer())
         tb.addAction(self._act_undo)
         tb.addAction(self._act_redo)
         tb.addSeparator()
@@ -162,9 +197,31 @@ class MainWindow(QMainWindow):
         tb.addSeparator()
         tb.addAction(self._act_move_up)
         tb.addAction(self._act_move_down)
-        tb.addSeparator()
+        tb.addWidget(_spacer())
         tb.addAction(self._act_edit)
         tb.addAction(self._act_delete_empty)
+
+    @staticmethod
+    def _rotated_icon(icon: QIcon, degrees: int) -> QIcon:
+        """Return a rotated copy of the given icon."""
+        # Render at 2x for Retina displays
+        size = 32
+        pixmap = icon.pixmap(size, size)
+        transform = QTransform().rotate(degrees)
+        rotated = pixmap.transformed(transform, Qt.SmoothTransformation)
+        return QIcon(rotated)
+
+    @staticmethod
+    def _mac_shortcut(shortcut: str) -> str:
+        """Convert a Qt shortcut string to Mac symbol notation."""
+        if not shortcut:
+            return ""
+        result = shortcut
+        result = result.replace("Ctrl+", "\u2318")
+        result = result.replace("Alt+", "\u2325")
+        result = result.replace("Shift+", "\u21E7")
+        result = result.replace("Meta+", "\u2303")
+        return result
 
     # ── Status bar ──────────────────────────────────────────────
 
@@ -194,8 +251,8 @@ class MainWindow(QMainWindow):
 
     def _update_title(self) -> None:
         name = Path(self._doc.file_path).name if self._doc and self._doc.file_path else "Untitled"
-        dirty = " •" if self._dirty else ""
-        self.setWindowTitle(f"{name}{dirty} — TMX Alignment Editor")
+        dirty = " \u2022" if self._dirty else ""
+        self.setWindowTitle(f"{name}{dirty}")
 
     # ── File operations ─────────────────────────────────────────
 

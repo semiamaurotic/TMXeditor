@@ -10,11 +10,12 @@ Provides:
 from __future__ import annotations
 
 from PySide6.QtCore import Qt, Signal, QSize, QRectF, QTimer
-from PySide6.QtGui import QTextOption, QTextDocument
+from PySide6.QtGui import QTextOption, QTextDocument, QPen, QColor
 from PySide6.QtWidgets import (
     QAbstractItemView,
     QHeaderView,
     QPlainTextEdit,
+    QStyle,
     QStyledItemDelegate,
     QTableView,
     QWidget,
@@ -34,6 +35,9 @@ class _CellEditor(QPlainTextEdit):
     completely hides the blinking caret in read-only widgets.
     Instead we keep the widget writable and revert any changes
     that happen outside edit mode.
+
+    TODO: Add native macOS context menu items (Translate, Look Up,
+    Services) via PyObjC or custom actions — see conversation notes.
     """
 
     split_at_cursor = Signal(int)  # emits cursor position
@@ -234,6 +238,13 @@ class _InlineCursorDelegate(QStyledItemDelegate):
             option.text = ""
             style.drawControl(style.ControlElement.CE_ItemViewItem, option, painter, option.widget)
 
+        # Draw subtle horizontal separator at bottom of cell
+        painter.save()
+        painter.setPen(QPen(QColor(220, 220, 220), 1))
+        y = option.rect.bottom()
+        painter.drawLine(option.rect.left(), y, option.rect.right(), y)
+        painter.restore()
+
         text = index.data(Qt.DisplayRole) or ""
         if not text:
             return
@@ -245,6 +256,13 @@ class _InlineCursorDelegate(QStyledItemDelegate):
         doc.setDefaultTextOption(text_option)
         doc.setPlainText(text)
         doc.setTextWidth(max(option.rect.width() - 16, 50))
+
+        # Use white text when selected so it's readable on the highlight
+        if option.state & QStyle.StateFlag.State_Selected:
+            palette = option.palette
+            color = palette.color(palette.ColorGroup.Active, palette.ColorRole.HighlightedText)
+            doc.setDefaultStyleSheet(f"body {{ color: {color.name()}; }}")
+            doc.setHtml(f"<body>{doc.toPlainText()}</body>")
 
         painter.save()
         painter.translate(option.rect.left() + 8, option.rect.top() + 6)
@@ -312,28 +330,8 @@ class AlignmentTableView(QTableView):
         # Reflow row heights when column is resized
         header.sectionResized.connect(self._on_column_resized)
 
-        # Styling
-        self.setStyleSheet(
-            """
-            QTableView {
-                gridline-color: #d0d0d0;
-                selection-background-color: #cce5ff;
-                selection-color: #000;
-            }
-            QTableView::item {
-                padding: 6px 8px;
-            }
-            QTableView::item:focus {
-                border: 2px solid #0078d4;
-            }
-            QHeaderView::section {
-                font-weight: bold;
-                padding: 6px;
-                background: #f0f0f0;
-                border: 1px solid #d0d0d0;
-            }
-            """
-        )
+        # Disable built-in grid (we draw horizontal lines in the delegate)
+        self.setShowGrid(False)
 
     # ── Word wrap & column sizing helpers ───────────────────────
 
