@@ -83,4 +83,15 @@ app = BUNDLE(
     name='TMXeditor.app',
     icon='src/tmxeditor/resources/app_icon.icns',
     bundle_identifier='com.semiamaurotic.tmxeditor',
+    info_plist={
+        'CFBundleDocumentTypes': [
+            {
+                'CFBundleTypeExtensions': ['tmx'],
+                'CFBundleTypeIconFile': 'app_icon.icns',
+                'CFBundleTypeName': 'TMX Translation Memory',
+                'CFBundleTypeRole': 'Editor',
+                'LSHandlerRank': 'Owner',
+            }
+        ]
+    }
 )

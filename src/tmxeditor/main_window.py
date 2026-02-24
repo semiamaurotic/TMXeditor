@@ -277,11 +277,16 @@ class MainWindow(QMainWindow):
         )
         if not path:
             return
+        self.load_file(path)
+
+    def load_file(self, path: str | Path) -> bool:
+        """Load a TMX file and return True on success. Can be called externally."""
         try:
             doc = parse_tmx(path)
         except Exception as exc:
-            QMessageBox.critical(self, "Open failed", str(exc))
-            return
+            QMessageBox.critical(self, "Open failed", f"Could not open file:\n{exc}")
+            return False
+            
         self._doc = doc
         self._model.set_document(doc)
         self._undo_stack.clear()
@@ -291,6 +296,7 @@ class MainWindow(QMainWindow):
         self._update_status()
         if doc.row_count() > 0:
             self._view.select_cell(0, 0)
+        return True
 
     def _file_save(self) -> None:
         if self._doc is None:
