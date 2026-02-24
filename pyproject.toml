@@ -16,6 +16,9 @@ dependencies = [
 test = [
     "pytest>=7.0",
 ]
+build = [
+    "pyinstaller>=6.4",
+]
 
 [project.scripts]
 tmxeditor = "tmxeditor.main:main"
@@ -24,7 +27,7 @@ tmxeditor = "tmxeditor.main:main"
 where = ["src"]
 
 [tool.setuptools.package-data]
-tmxeditor = ["default_shortcuts.json"]
+tmxeditor = ["default_shortcuts.json", "resources/*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
